@@ -11,7 +11,10 @@ DATA_FILE = "data.json"
 bot = Bot(token=BOT_TOKEN)
 
 def load_data():
-    if not os.path.exists(DATA_FILE):
+    if not os.path.exists(DATA_FILE) or os.path.getsize(DATA_FILE) == 0:
+        # create empty list if file missing or empty
+        with open(DATA_FILE, "w") as f:
+            json.dump([], f)
         return []
     with open(DATA_FILE, "r") as f:
         return json.load(f)
