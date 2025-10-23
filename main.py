@@ -8,7 +8,6 @@ DATA_FILE = "data.json"
 
 bot = Bot(token=BOT_TOKEN)
 
-# Ensure data.json exists
 def load_data():
     if not os.path.exists(DATA_FILE) or os.path.getsize(DATA_FILE) == 0:
         with open(DATA_FILE, "w") as f:
@@ -36,14 +35,15 @@ def check_reminders():
             upload_date = datetime.date.fromisoformat(item["date"])
             days_passed = (today - upload_date).days
             if days_passed == 113:
-                bot.send_message(chat_id=CHAT_ID,
-                                 text=f"⚠️ Reminder: Your Pixeldrain file will auto-delete in 7 days!\n{item['link']}")
+                bot.send_message(
+                    chat_id=CHAT_ID,
+                    text=f"⚠️ Reminder: Your Pixeldrain file will auto-delete in 7 days!\n{item['link']}"
+                )
             if days_passed < 120:
                 updated.append(item)
         save_data(updated)
-        time.sleep(86400)  # daily check
+        time.sleep(86400)  # daily
 
-# Telegram message handler
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     text = update.message.text
     if "pixeldrain.com" in text:
@@ -51,13 +51,14 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     else:
         await update.message.reply_text("Send a valid Pixeldrain link only!")
 
-# Main bot
 def main():
     app = ApplicationBuilder().token(BOT_TOKEN).build()
     app.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), handle_message))
 
+    # Start daily reminder thread
     threading.Thread(target=check_reminders, daemon=True).start()
 
+    # Run bot
     app.run_polling()
 
 if __name__ == "__main__":
